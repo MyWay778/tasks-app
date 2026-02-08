@@ -1,0 +1,9 @@
+{
+  "\u0000plugin-vue:export-helper": [],
+  "resources/js/Components/TaskItem.vue": [],
+  "resources/js/Layouts/Default.vue": [],
+  "resources/js/Pages/CreateTask.vue": [],
+  "resources/js/Pages/EditTask.vue": [],
+  "resources/js/Pages/TaskList.vue": [],
+  "resources/js/ssr.js": []
+}
