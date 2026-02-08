@@ -69,7 +69,11 @@ const submitForm = async () => {
         router.push("/");
     } catch (err) {
         if (err.response && err.response.status === 422) {
-            errors.value = { general: err.response.data.message };
+            if (err.response.data.errors) {
+                errors.value = err.response.data.errors;
+            } else {
+                errors.value = { general: err.response.data.message };
+            }
         } else {
             alert("Произошла ошибка при обновлении");
         }

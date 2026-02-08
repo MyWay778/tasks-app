@@ -3,10 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\StoreTaskRequest;
+use App\Http\Requests\UpdateTaskRequest;
 use App\Models\Task;
-use Illuminate\Http\Request;
-use App\Enums\TaskStatus;
-use Illuminate\Validation\Rules\Enum;
 
 class TaskController extends Controller
 {
@@ -17,15 +16,9 @@ class TaskController extends Controller
     }
 
     // POST /api/tasks (Создание)
-    public function store(Request $request)
+    public function store(StoreTaskRequest $request)
     {
-        $validated = $request->validate([
-            'title' => 'required|string|max:255',
-            'description' => 'nullable|string',
-            'status' => [new Enum(TaskStatus::class)],
-        ]);
-
-        return Task::create($validated);
+        return Task::create($request->validated());
     }
 
     // GET /api/tasks/{task} (Просмотр одной)
@@ -35,15 +28,9 @@ class TaskController extends Controller
     }
 
     // PUT/PATCH /api/tasks/{task} (Обновление)
-    public function update(Request $request, Task $task)
+    public function update(UpdateTaskRequest $request, Task $task)
     {
-        $validated = $request->validate([
-            'title' => 'sometimes|required|string|max:255',
-            'description' => 'nullable|string',
-            'status' => [new Enum(TaskStatus::class)],
-        ]);
-
-        $task->update($validated);
+        $task->update($request->validated());
         return $task;
     }
 
