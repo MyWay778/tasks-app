@@ -22,7 +22,7 @@ const fetching = ref(true); // Состояние загрузки данных 
 const fetchTask = async () => {
     try {
         const response = await axios.get(`tasks/${route.params.id}`);
-        const task = response.data;
+        const task = response.data.data;
 
         title.value = task.title;
         description.value = task.description;

@@ -30,3 +30,4 @@ class StoreTaskRequest extends BaseTaskRequest
         }
     }
 }
+

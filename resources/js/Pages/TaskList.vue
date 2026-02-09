@@ -10,7 +10,7 @@ const isFirstLoading = ref(true); // Состояние первой загру�
 const fetchTasks = async () => {
     try {
         const response = await axios.get("/tasks");
-        tasks.value = response.data;
+        tasks.value = response.data.data;
     } catch (error) {
         console.error("Ошибка при загрузке:", error);
     } finally {
