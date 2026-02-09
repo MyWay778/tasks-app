@@ -6,8 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 use App\Enums\TaskStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 
-use Illuminate\Support\Facades\Log;
-
 class Task extends Model
 {
     use HasFactory;
