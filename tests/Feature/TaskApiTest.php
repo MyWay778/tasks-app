@@ -12,9 +12,9 @@ class TaskApiTest extends TestCase
     use RefreshDatabase;
 
     /**
-     * Test getting list of tasks.
+     * Test getting list of tasks with pagination.
      */
-    public function test_can_get_list_of_tasks(): void
+    public function test_can_get_list_of_tasks_with_pagination(): void
     {
         $tasks = Task::factory()->count(3)->create();
 
@@ -33,11 +33,102 @@ class TaskApiTest extends TestCase
                         'updated_at',
                     ],
                 ],
+                'links' => [
+                    'first',
+                    'last',
+                    'prev',
+                    'next',
+                ],
+                'meta' => [
+                    'current_page',
+                    'from',
+                    'last_page',
+                    'path',
+                    'per_page',
+                    'to',
+                    'total',
+                ],
             ]);
 
         // Verify tasks are ordered by id desc
         $responseData = $response->json('data');
         $this->assertEquals($tasks->last()->id, $responseData[0]['id']);
+        
+        // Verify pagination metadata
+        $meta = $response->json('meta');
+        $this->assertEquals(1, $meta['current_page']);
+        $this->assertEquals(15, $meta['per_page']);
+        $this->assertEquals(3, $meta['total']);
+        $this->assertEquals(1, $meta['last_page']);
+    }
+
+    /**
+     * Test pagination with multiple pages.
+     */
+    public function test_pagination_works_with_multiple_pages(): void
+    {
+        Task::factory()->count(25)->create();
+
+        // First page
+        $response = $this->getJson('/api/tasks?page=1&per_page=10');
+        $response->assertStatus(200);
+        
+        $data = $response->json('data');
+        $meta = $response->json('meta');
+        
+        $this->assertCount(10, $data);
+        $this->assertEquals(1, $meta['current_page']);
+        $this->assertEquals(10, $meta['per_page']);
+        $this->assertEquals(25, $meta['total']);
+        $this->assertEquals(3, $meta['last_page']);
+
+        // Second page
+        $response = $this->getJson('/api/tasks?page=2&per_page=10');
+        $response->assertStatus(200);
+        
+        $data = $response->json('data');
+        $meta = $response->json('meta');
+        
+        $this->assertCount(10, $data);
+        $this->assertEquals(2, $meta['current_page']);
+
+        // Last page
+        $response = $this->getJson('/api/tasks?page=3&per_page=10');
+        $response->assertStatus(200);
+        
+        $data = $response->json('data');
+        $meta = $response->json('meta');
+        
+        $this->assertCount(5, $data); // Only 5 items on last page
+        $this->assertEquals(3, $meta['current_page']);
+    }
+
+    /**
+     * Test pagination respects per_page parameter limits.
+     */
+    public function test_pagination_respects_per_page_limits(): void
+    {
+        Task::factory()->count(5)->create();
+
+        // Test default per_page
+        $response = $this->getJson('/api/tasks');
+        $meta = $response->json('meta');
+        $this->assertEquals(15, $meta['per_page']);
+
+        // Test custom per_page
+        $response = $this->getJson('/api/tasks?per_page=5');
+        $meta = $response->json('meta');
+        $this->assertEquals(5, $meta['per_page']);
+
+        // Test per_page exceeds maximum (should be capped at 100)
+        $response = $this->getJson('/api/tasks?per_page=200');
+        $meta = $response->json('meta');
+        $this->assertEquals(100, $meta['per_page']);
+
+        // Test per_page below minimum (should be at least 1)
+        $response = $this->getJson('/api/tasks?per_page=0');
+        $meta = $response->json('meta');
+        $this->assertEquals(1, $meta['per_page']);
     }
 
     /**

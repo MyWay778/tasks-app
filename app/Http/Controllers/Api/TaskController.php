@@ -13,8 +13,11 @@ class TaskController extends Controller
     // GET /api/tasks (Список)
     public function index()
     {
+        $perPage = request()->integer('per_page', 15);
+        $perPage = min(max($perPage, 1), 100); // Limit between 1 and 100
+
         return TaskResource::collection(
-            Task::orderBy('id', 'desc')->get()
+            Task::orderBy('id', 'desc')->paginate($perPage)
         );
     }
 
